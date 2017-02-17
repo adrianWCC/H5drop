@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:http="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        .height100{
+            height: 100px;
+        }
+        .padding20{
+            padding: 20px;
+        }
+        .yellow{
+            background-color: yellow;
+        }
+    </style>
+</head>
+<body>
+<section>
+
+</section>
+<script src="http://apps.bdimg.com/libs/jquery/2.1.1/jquery.min.js"></script>
+<script>
+    var json = [
+        {index:0},
+        {index:1},
+        {index:2}
+    ];
+    function render(){
+        $("section").empty();
+        for(var i=0;i<json.length;i++){
+            var html = `
+          <div id="${i}" class="padding20 target">
+            <div class="height100 yellow srcObj" draggable="true">这是第:${json[i].index}</div>
+          </div>
+        `;
+            $("section").append(html);
+        }
+        eventBind();
+    }
+
+    function eventBind(){
+        var srcObj = null;
+        var srcCon = null;
+        var target = null;
+        var srcList = $(".srcObj");
+        var targetList = $(".target");
+
+        for(var i=0;i<srcList.length;i++){
+            var div = srcList[i];
+            div.ondragstart=function(e){//拖拽源被拖动开始
+                var _this = this;
+                e.dataTransfer.setData('srcCon',_this.parentNode.id);//通过e.dataTransfer.setData(k,v)可以在拖拽api中传递数据
+                srcObj = this;
+            };
+            div.ondrag = function(){//拖拽源被拖动
+
+            };
+            div.ondragend = function(){//拖拽源被拖拽结束
+
+            };
+        }
+        for(var k=0;k<targetList.length;k++){
+            var targetDiv = targetList[k];
+            targetDiv.ondragenter=function(){//进入拖拽目标
+                $(this).css("border","1px solid red");
+            };
+            targetDiv.ondragover = function(e){//悬停在拖拽目标上,该事件的默认事件会阻止ondrop的执行
+                e.preventDefault(); //使得drop可以触发
+                $(this).css("border","1px solid red");
+            };
+            targetDiv.ondragleave = function(){//离开拖拽目标
+                $(this).css("border","0");
+            };
+            targetDiv.ondrop=function(e){//在拖拽目标上结束拖拽
+                $(this).css("border","0");
+                srcCon = Number(e.dataTransfer.getData('srcCon'));//e.dataTransfer.getData(k)可以获得拖拽api传递的数据
+                targetCon = Number(this.id);
+                var obj=null;
+                if(srcCon>targetCon){//向上拖动
+                    obj = json[srcCon];
+                    json.splice(srcCon,1);
+                    json.splice(targetCon,0,obj);
+                }else if(srcCon<targetCon){//向下拖动
+                    obj = json[srcCon];
+                    json.splice(targetCon+1,0,obj);
+                    json.splice(srcCon,1);
+                }
+                render();
+            }
+        }
+    }
+
+    render();
+</script>
+</body>
+</html>
